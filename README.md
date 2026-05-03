@@ -54,7 +54,8 @@ Open [http://localhost:3001](http://localhost:3001).
 
 - **Frontend:** Vercel (or similar) — set `NEXT_PUBLIC_NEWSLETTER_API_URL` to your public API URL.  
 - **Backend:** any Python host (Railway, Render, Fly.io, VM) — run `uvicorn`, persist or rebuild `data/processed` after deploy. **`https://*.vercel.app`** is allowed for CORS by default; add **`ALLOWED_ORIGINS`** for custom domains. Local dev origins are always allowed.  
-- **Render / small RAM:** Retrieval uses **FastEmbed** (ONNX), not PyTorch `sentence-transformers`, so `POST /generate-newsletter` is far less likely to OOM than before. If deploy health checks time out while the embedding model downloads, trigger a redeploy or set **`SKIP_RETRIEVER_WARMUP=1`** (first newsletter request may be slower).
+- **Render / small RAM:** Retrieval uses **FastEmbed** (ONNX), not PyTorch `sentence-transformers`, so `POST /generate-newsletter` is far less likely to OOM than before. If deploy health checks time out while the embedding model downloads, trigger a redeploy or set **`SKIP_RETRIEVER_WARMUP=1`** (first newsletter request may be slower).  
+- **Render Python version:** This repo includes **`.python-version`** (`3.12`). Render’s default **3.14** often forces source builds (e.g. `py-rust-stemmers` + Cargo) that fail on their filesystem; **3.12** pulls prebuilt wheels. You can also set env **`PYTHON_VERSION=3.12.8`** (full patch) in the dashboard.
 
 ## Project layout
 
