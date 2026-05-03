@@ -126,7 +126,3 @@ src/
 ```
 
 ---
-
-## License
-
-Use is governed by your course or organization; the repository owner may specify a formal license separately.
