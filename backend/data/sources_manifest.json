@@ -1,0 +1,31 @@
+{
+  "sources": [
+    {
+      "id": "indiaai-report-2024",
+      "source_name": "IndiaAI / Ministry of Electronics and Information Technology (MeitY)",
+      "publication_date": "2024-01-01",
+      "description": "Sub-committee report on India's AI governance direction, institutional roles, and policy pathways for safe adoption.",
+      "url": "https://indiaai.s3.ap-south-1.amazonaws.com/docs/subcommittee-report-dec26.pdf",
+      "file": "corpus/subcommittee-report-dec-26.pdf",
+      "type": "pdf"
+    },
+    {
+      "id": "niti-aayog-responsible-ai",
+      "source_name": "NITI Aayog, Government of India",
+      "publication_date": "2021-02-01",
+      "description": "Responsible AI framework (Part 1) defining principles, governance priorities, and public-interest safeguards.",
+      "url": "https://www.niti.gov.in/sites/default/files/2020-11/Towards_Responsible_AIforAll_Part1.pdf",
+      "file": "corpus/towards-responsible-ai-for-all-part-1.pdf",
+      "type": "pdf"
+    },
+    {
+      "id": "meity-ai-advisory-2024",
+      "source_name": "Cyber Laws & Data Governance Division, MeitY",
+      "publication_date": "2024-03-15",
+      "description": "Government advisory for intermediaries/platforms on AI model deployment, accountability, and legal compliance expectations.",
+      "url": "https://www.meity.gov.in/static/uploads/2024/02/9f6e99572739a3024c9cdaec53a0a0ef.pdf",
+      "file": "corpus/responsible-ai-principles.pdf",
+      "type": "pdf"
+    }
+  ]
+}
