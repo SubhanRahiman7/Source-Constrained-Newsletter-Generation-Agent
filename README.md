@@ -53,7 +53,7 @@ Open [http://localhost:3001](http://localhost:3001).
 ## Deploy (outline)
 
 - **Frontend:** Vercel (or similar) — set `NEXT_PUBLIC_NEWSLETTER_API_URL` to your public API URL.  
-- **Backend:** any Python host (Railway, Render, Fly.io, VM) — run `uvicorn`, persist or rebuild `data/processed` after deploy, ensure CORS `allow_origins` includes your frontend origin.
+- **Backend:** any Python host (Railway, Render, Fly.io, VM) — run `uvicorn`, persist or rebuild `data/processed` after deploy. Set **`ALLOWED_ORIGINS`** to a comma-separated list of frontend URLs (e.g. `https://your-app.vercel.app`). Local dev origins are always allowed.
 
 ## Project layout
 

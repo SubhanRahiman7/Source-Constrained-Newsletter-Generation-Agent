@@ -1,19 +1,37 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.models import NewsletterRequest, NewsletterResponse, SourceInfo
 from app.newsletter import generate_newsletter, list_sources
 
+_DEFAULT_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+]
+
+
+def _cors_origins() -> list[str]:
+    raw = os.getenv("ALLOWED_ORIGINS", "").strip()
+    extra = [o.strip() for o in raw.split(",") if o.strip()]
+    # De-dupe while preserving order
+    seen: set[str] = set()
+    out: list[str] = []
+    for o in _DEFAULT_ORIGINS + extra:
+        if o not in seen:
+            seen.add(o)
+            out.append(o)
+    return out
+
+
 app = FastAPI(title="Source-Constrained Newsletter Backend")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:3001",
-        "http://127.0.0.1:3001",
-    ],
+    allow_origins=_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
