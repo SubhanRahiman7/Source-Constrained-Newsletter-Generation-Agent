@@ -1,10 +1,20 @@
 import os
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.models import NewsletterRequest, NewsletterResponse, SourceInfo
 from app.newsletter import generate_newsletter, list_sources
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if os.getenv("SKIP_RETRIEVER_WARMUP", "").strip().lower() not in ("1", "true", "yes"):
+        from app.retriever import warm_retriever_bundle
+
+        warm_retriever_bundle()
+    yield
 
 _DEFAULT_ORIGINS = [
     "http://localhost:3000",
@@ -33,7 +43,7 @@ _VERCEL_ORIGIN_REGEX = os.getenv(
     "CORS_VERCEL_REGEX", r"https://[\w.-]+\.vercel\.app$"
 ).strip() or None
 
-app = FastAPI(title="Source-Constrained Newsletter Backend")
+app = FastAPI(title="Source-Constrained Newsletter Backend", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,

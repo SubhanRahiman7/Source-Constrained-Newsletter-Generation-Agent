@@ -9,7 +9,7 @@ from typing import Any
 
 import faiss  # type: ignore[import-untyped]
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 from app.config import (
     EMBEDDING_MODEL_NAME,
@@ -29,7 +29,7 @@ class RetrievalHit:
 
 _index: faiss.Index | None = None
 _meta: list[dict[str, Any]] | None = None
-_model: SentenceTransformer | None = None
+_model: TextEmbedding | None = None
 _loaded_for: Path | None = None
 
 
@@ -41,7 +41,14 @@ def reset_retriever_cache() -> None:
     _loaded_for = None
 
 
-def _load_retriever_bundle(data_dir: Path) -> tuple[faiss.Index, list[dict[str, Any]], SentenceTransformer]:
+def warm_retriever_bundle(data_dir: Path | None = None) -> None:
+    """Load FAISS + embedding model at startup (avoids first-request spike; fails deploy if index missing)."""
+    if data_dir is None:
+        data_dir = default_data_dir()
+    _load_retriever_bundle(data_dir.resolve())
+
+
+def _load_retriever_bundle(data_dir: Path) -> tuple[faiss.Index, list[dict[str, Any]], TextEmbedding]:
     global _index, _meta, _model, _loaded_for
     data_dir = data_dir.resolve()
     if _index is not None and _meta is not None and _model is not None and _loaded_for == data_dir:
@@ -58,7 +65,7 @@ def _load_retriever_bundle(data_dir: Path) -> tuple[faiss.Index, list[dict[str, 
     _meta = json.loads(meta_path.read_text(encoding="utf-8"))
     if not isinstance(_meta, list):
         raise ValueError("index_meta must be a JSON array")
-    _model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    _model = TextEmbedding(model_name=EMBEDDING_MODEL_NAME)
     _loaded_for = data_dir
     return _index, _meta, _model
 
@@ -84,8 +91,7 @@ def retrieve_chunks(
     index, meta, model = _load_retriever_bundle(data_dir)
     excluded = set(excluded_source_ids or [])
 
-    qv = model.encode([q], normalize_embeddings=True, convert_to_numpy=True)
-    qv = np.asarray(qv, dtype="float32")
+    qv = np.stack(list(model.embed([q], batch_size=1)), axis=0).astype("float32", copy=False)
     # Oversample then filter exclusions / threshold.
     n_probe = min(len(meta), max(top_k * 6, top_k))
     scores, idxs = index.search(qv, n_probe)

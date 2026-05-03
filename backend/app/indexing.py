@@ -8,7 +8,7 @@ from typing import Any
 
 import faiss  # type: ignore[import-untyped]
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 from app.config import (
     CHUNKS_FILENAME,
@@ -49,16 +49,11 @@ def build_faiss_index(
     rows = _load_chunks(chunks_path)
     texts = [str(r["text"]) for r in rows]
 
-    model = SentenceTransformer(model_name)
-    embeddings = model.encode(
-        texts,
-        normalize_embeddings=True,
-        show_progress_bar=False,
-        convert_to_numpy=True,
-    )
-    if embeddings.ndim != 2:
+    model = TextEmbedding(model_name=model_name)
+    embeddings = list(model.embed(texts, batch_size=64))
+    vectors = np.stack(embeddings, axis=0).astype("float32", copy=False)
+    if vectors.ndim != 2:
         raise RuntimeError("Unexpected embedding shape")
-    vectors = np.asarray(embeddings, dtype="float32")
     dim = vectors.shape[1]
     index = faiss.IndexFlatIP(dim)
     index.add(vectors)
