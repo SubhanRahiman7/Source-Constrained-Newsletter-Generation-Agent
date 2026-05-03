@@ -27,11 +27,18 @@ def _cors_origins() -> list[str]:
     return out
 
 
+# Any Vercel host (*.vercel.app) so preview/production URLs work without listing each one on Render.
+# Set CORS_VERCEL_REGEX= to empty in env to disable (only ALLOWED_ORIGINS + defaults then).
+_VERCEL_ORIGIN_REGEX = os.getenv(
+    "CORS_VERCEL_REGEX", r"https://[\w.-]+\.vercel\.app$"
+).strip() or None
+
 app = FastAPI(title="Source-Constrained Newsletter Backend")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_cors_origins(),
+    allow_origin_regex=_VERCEL_ORIGIN_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
