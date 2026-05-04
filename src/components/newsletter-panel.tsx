@@ -85,6 +85,7 @@ export function NewsletterPanel() {
   );
   const [excluded, setExcluded] = useState<Set<string>>(new Set());
   const [busy, setBusy] = useState(false);
+  const [coldStartHint, setColdStartHint] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [sources, setSources] = useState<SourceInfo[]>([]);
@@ -106,6 +107,16 @@ export function NewsletterPanel() {
       cancelled = true;
     };
   }, [apiBase]);
+
+  useEffect(() => {
+    if (!busy) {
+      setColdStartHint(false);
+      return;
+    }
+    // Render free tier can sleep; reveal this note only for slow responses.
+    const t = window.setTimeout(() => setColdStartHint(true), 4000);
+    return () => window.clearTimeout(t);
+  }, [busy]);
 
   async function run() {
     setBusy(true);
@@ -235,6 +246,13 @@ export function NewsletterPanel() {
       {error ? (
         <p className="mt-4 rounded-xl border border-red-500/25 bg-red-500/10 px-3 py-2 text-sm text-red-200">
           {error}
+        </p>
+      ) : null}
+
+      {busy && coldStartHint ? (
+        <p className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/10 px-3 py-3 text-sm text-amber-100">
+          Waking up backend on Render free tier. First request can take 30-90
+          seconds after inactivity, so please wait.
         </p>
       ) : null}
 
